@@ -1,0 +1,184 @@
+---
+title: "Un enfoque de programación matemática para la generación de modelos de regresión y su aplicación para el análisis de datos del béisbol profesional"
+author: "Fernando Crema"
+
+documentclass: report
+
+header-includes:
+  - \usepackage[T1]{fontenc}
+  - \usepackage[utf8]{inputenc}
+  - \geometry{a4paper,left=3cm, right=3cm, top=2cm,bottom=3cm}
+  - \usepackage[spanish]{babel}
+  - \usepackage[title, titletoc]{appendix}
+  - \usepackage{fancyhdr}
+  - \usepackage{etoolbox}
+  - \makeatletter
+  - \appto{\appendices}{\def\Hy@chapapp{Appendix}}
+  - \makeatother
+  - \setlength{\parindent}{0.5cm}
+  - \newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+  - \newcommand{\norm}[1]{\left\Vert#1\right\Vert}
+  - \newcommand{\espa}{\text{ }}
+
+output: 
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+---
+
+\renewcommand{\headrulewidth}{2pt}
+\renewcommand{\footrulewidth}{1pt}
+
+\chapter{Introducción}
+
+Supongamos que el valor de una variable $y$ debe ser explicado aproximadamente por el valor que toman las variables $x_j$ con $j=1, \dots ,n$. Se dispone de los datos: $y_i, x^{(i)}$ con $y_i \in     \mathbb{R}$, $x^{(i)} \in \mathbb{R}^n$, $i=1, \dots ,m$.
+
+Consideraremos la aplicación de un Modelo Lineal como sigue:
+
+\[ y = \alpha_0+\alpha^t x \text{ con } \alpha_0 \in \mathbb{R} \text{ y } \alpha \in \mathbb{R}^n \]
+
+En la literatura usual $y$ es la variable que debe ser explicada y $x_j$, $j=1, \dots, m$ son las variables (regresores) para explicar a $y$.
+
+El error en el dato $i$ viene dado por:
+
+\[ \beta_i = y_i - \alpha_0 -\alpha^t x^{(i)}  \]
+
+El vector asociado $\beta$ con $\beta \in \mathbb{R}^m$ es conocido en la literatura como el vector de errores residuales.
+
+Para generar un modelo, se utilizan usualmente dos funciones:
+
+1. La función de error, que mide de alguna manera aceptable el error global de ajuste del modelo a los datos.
+1. La función de complejidad, definida en un intento de medir cuán ``simple'' es el modelo a los fines de lograr modelos de fácil interpretación.
+
+# Función de error
+
+Una función de error se define de la siguiente manera:
+
+\[Error(\beta) = \sum_{i=1}^m \rho(\beta_i) \text{ con } \rho:\mathbb{R} \rightarrow \mathbb{R} \text{ una función ``apropiada''} \]
+
+Algunas opciones naturales y usuales para $\rho$ son:
+
+1. $\rho(t) = \frac{1}{2}t^2$ con lo cual $Error(\beta)=\frac{1}{2}\norm{\beta}^2_2$
+1. $\rho(t) = \abs{t}$ con lo cual $Error(\beta)=\frac{1}{2}\norm{\beta}_1$
+
+Existen otras opciones para $\rho$ que serán identificadas más adelante junto con las exigencias para que una función definida con base en $\rho$ califique como función de error.
+
+# Función de complejidad
+
+Una función de complejidad $C:\mathbb{R}^n \rightarrow \mathbb{R}$ o $C: \mathbb{R}^{n+1} \rightarrow \mathbb{R}$ (el término de regularización en la literatura) debe definirse de tal manera que al acotar o penalizar el valor que tome al ser evaluada en el modelo (en $\alpha$ o en $\left(\alpha_0,\alpha\right)$) se logren modelos ``simples''. Usualmente, el término independiente del modelo $\left( \alpha_0 \right)$ no se penaliza y el trabajo se escribirá bajo esa suposición aún cuando no hay ningún inconveniente por penalizar a $\left( \alpha_0 \right)$.
+
+Una opción natural en la búsqueda de simplicidad del modelo es limitar (o penalizar) el número de regresores que terminen siendo distintos a cero (otras opciones serán consideradas más adelante). Así, definimos $C$ como sigue:
+
+\[ C\left(\alpha \right) = card\big( \{ j: \alpha_j \neq 0 \}  \big)\]
+
+Al valor $C(\alpha)$ así definido se le conoce en la literatura como la ``norma cero'' de $\alpha$ (aún cuando no se trata de ninguna norma) y se denota como $\norm{alpha}_0$.
+
+# El problema
+
+Sea $\alpha \geq 0$ el parámetro de regularización. El problema por resolver para hallar un modelo ``simple'' que ajuste razonablemente viene dado por:
+
+$$ P(\lambda): \text{ min } Error(\beta) +\lambda C(\alpha) \text{s.a} $$
+$$ \beta_i = y_i-\alpha_0-\alpha^t x^i \text{ } (i=1, \dots, m)$$
+$$ \alpha_0 \in \mathbb{R}, \text{ } \alpha \in \mathbb{R}^n, \text{ } \beta \in \mathbb{R}^m$$
+
+Para distintas selecciones de las funciones de $Error$ y $C$ aparecen distintos tipos de problemas $P(\lambda)$.
+
+En $P(\lambda)$ estamos penalizando a la función de complejidad. En la medida que $\lambda$ aumente más ``simple'' será el modelo pero mayor error se estará cometiendo. A los fines de seleccionar un buen modelo, puede resultar muy útil generar todos los posibles resolviendo $P(\lambda) \text{ } \forall \lambda \text{ con } \lambda \in [0, \infty)$.
+
+Se define entonces un Camino de Regularización $(CR)$ de la siguiente manera:
+
+$$ CR = \Big\{ \big(  v(P(\lambda)), \espa \alpha_0^*(\lambda), \espa \alpha^*(\lambda) \big), \espa \lambda \in [0, \infty) \Big\} $$
+
+# Contribuciones y limitaciones
+
+## Generalización de funciones de error y funciones de complejidad
+
+Presentaremos una generalización de las funciones de error que incluye como casos particulares a las usualmente consideradas en la literatura ($\norm{\beta}^2_2, \espa \norm{\beta}_1$ y otras) y consideraremos las funciones de complejidad que aparecen en la literatura ($\norm{\alpha}_0$ y otras).
+
+## Formulación de los problemas
+
+Demostraremos que para todas las combinaciones de funciones de error y complejidad el problema $P(\lambda$ y otro problema auxiliar que surge naturalmente, pueden ser escritos, en el peor de los casos, como uno de Programación Cuadrática Convexa Entera Mixta (posiblemente de Programación Lineal Entera Mixta, de Programación Cuadrática Convexa y de Programación Lineal simplemente) con lo cual un resolvedor profesional surge como alternativa general (CPLEX por ejemplo).
+
+## Uso de Algoritmo de las cuerdas para aproximar $CR$
+
+Demostraremos que en todos los casos el clásico ``Algoritmo de las cuerdas'' (que reconstruye funciones convexas que no se conocen explícitamente pero para las cuales es posible evaluar el valor de la función en cualquier punto) es suficiente para hallar una aproximación a un camino de regularización tan buena como se exija.
+
+## Falta subtítulo
+
+Observaremos que para algunas combinaciones de funciones de error y complejidad el resultado es nuevo en relación a la formulación presentada y para otras no existe en la literatura algoritmos precedentes para hallar un camino de regularización.
+
+## Subtítulo
+
+Observaremos que para algunas combinaciones de funciones de error y complejidad existen algoritmos específicos eficientes con los cuales nuestra propuesta no puede competir, salvo por su generalidad.
+
+## Subtítulo
+
+Observaremos como nuestra propuesta tiene como una de sus virtudes que no es necesario contar con un algoritmo especíco para la combinación seleccionada de funciones de error y complejidad. Mas aún, bajo ciertas condiciones muy generales, el considerar alguna función de error o de complejidad nueva solo requeriría de la capacidad para formular adecuadamente el problema $P(\lambda)$ y no sería necesario desarrollar algoritmo alguno.
+
+## Subtítulo
+
+Presentaremos una heurística para hallar un camino de regularización para el caso en el cual la función de complejidad está definida por la ``norma
+cero'' en cuyo caso cualquier algoritmo que suponga la resolución exacta de los problemas $P(\lambda)$ puede resultar extremadamente ineficiente.
+
+## Subtítulo
+
+La selección del ``mejor'' modelo y sus propiedades estadísticas dependiendo de las funciones de error y complejidad utilizadas escapan a los objetivos de este trabajo.
+
+## Subtítulo
+
+Presentaremos un Sistema Computacional para generar modelos especícamente dirigidos a los analistas de las estadísticas del beisbol profesional.
+
+# Organización del trabajo
+
+El trabajo está organizado de la siguiente manera: en el capítulo 2, presentamos las funciones de error usuales y su generalización así como las funciones de complejidad usuales; en el capítulo 3, se define un problema auxiliar asociado a $P(\lambda)$ de extrema utilidad para hallar caminos de regularización y se estudian sus propiedades; en el capítulo 4, se verifica que todos los problemas $P(\lambda)$ y los auxiliares pueden escribirse, en el peor de los casos, como un problema de Programación Cuadrática Convexa Entera Mixta y se identifican los casos particulares (Programación Lineal Entera Mixta, Programación Cuadrática Convexa y Programción Lineal), en la sección 5 se evidencia que el ``Algoritmo de las cuerdas'' puede ser utilizado en todos los casos para hallar caminos de regularización; en el capítulo 6, se presenta una heurística especial para el caso en el cual la función de complejidad está definida por la norma cero; en el capítulo 7, se presentan resultados computacionales para datos generados artificialmente; en el capítulo 8, se presentan las variables relacionadas con el beisbol profesional y los resultados computacionales asociados; en el capítulo 9, se presenta el Sistema Computacional para generar modelos relacionados con las estadísticas del beisbol y finalmente en el capítulo 10 se presentan las conclusiones y sugerencias sobre el trabajo a desarrollar en el futuro.
+
+Algunos apéndices son necesarios para facilitarle la vida al lector y/o para evitar colocar en el texto conocimientos generales que se asumen conocidos, como sigue:
+
+1. Funciones Convexas y Cóncavas.
+1. Normas.
+1. Gradientes y subgradientes.
+1. Programación Lineal.
+1. Programación Cuadrática Convexa.
+1. Programación Lineal Entera Mixta.
+1. Programación Cuadrática Convexa Entera Mixta.
+1. Uso de indicadores.
+1. Parametrización Lineal y Cuadrática.
+1. El Algoritmo de las cuerdas. 
+
+\chapter{Funciones de Error y Complejidad}
+
+```{r echo =FALSE}
+data(iris)
+plot(iris)
+
+```
+
+\chapter{Los problemas $P(\lambda)$ y $\hat{P}(\delta)$}
+
+\chapter{El algoritmo de las cuerdas y caminos de regularización}
+
+\chapter{Heurística para el caso $C(\alpha)= \norm{\alpha}_0$}
+
+\chapter{Resultados Computacionales con datos artificiales}
+
+\chapter{Los datos del béisbol profesional y resultados computacionales}
+
+\chapter{El Sistema}
+
+\chapter{Conclusiones y trabajo a futuro}
+
+\chapter{ Bibliografía}
+
+\begin{appendices}
+\chapter{Funciones Convexas y Cóncavas}
+\chapter{Normas}
+\chapter{Gradientes y subgradientes}
+\chapter{Programación Lineal}
+\chapter{Programación Cuadrática Convexa}
+\chapter{Programación Lineal Entera Mixta}
+\chapter{Programación Cuadrática Convexa Entera Mixta}
+\chapter{Uso de indicadores}
+\chapter{Parametrización Lineal y Cuadrática}
+\chapter{El Algoritmo de las cuerdas}
+\end{appendices}
